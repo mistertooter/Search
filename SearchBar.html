@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Animated Search Bar</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at 20% 20%, #3b0764, transparent 35%),
+        radial-gradient(circle at 80% 80%, #0047ab, transparent 35%),
+        #050816;
+      overflow: hidden;
+    }
+
+    /* Floating background circles */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(5px);
+      opacity: 0.6;
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .orb1 {
+      width: 180px;
+      height: 180px;
+      background: #ff00cc;
+      top: 10%;
+      left: 10%;
+    }
+
+    .orb2 {
+      width: 220px;
+      height: 220px;
+      background: #00eaff;
+      right: 10%;
+      bottom: 10%;
+      animation-delay: -3s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px) translateX(0px);
+      }
+
+      50% {
+        transform: translateY(-35px) translateX(20px);
+      }
+    }
+
+    .container {
+      position: relative;
+      width: 90%;
+      max-width: 650px;
+      z-index: 10;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+      letter-spacing: 2px;
+    }
+
+    h1 span {
+      background: linear-gradient(
+        90deg,
+        #00ffff,
+        #ff00ff,
+        #ffff00,
+        #00ffff
+      );
+
+      background-size: 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+
+      animation: titleColor 4s linear infinite;
+    }
+
+    @keyframes titleColor {
+      0% {
+        background-position: 0%;
+      }
+
+      100% {
+        background-position: 300%;
+      }
+    }
+
+    /* Animated gradient wrapper */
+    .search-wrapper {
+      padding: 4px;
+      border-radius: 50px;
+
+      background: linear-gradient(
+        90deg,
+        #00ffff,
+        #7c3aed,
+        #ff00cc,
+        #ffea00,
+        #00ffff
+      );
+
+      background-size: 400%;
+      animation: borderMove 5s linear infinite;
+
+      box-shadow:
+        0 0 20px rgba(0, 255, 255, 0.5),
+        0 0 40px rgba(255, 0, 255, 0.25);
+
+      transition: 0.4s;
+    }
+
+    .search-wrapper:focus-within {
+      transform: scale(1.04);
+
+      box-shadow:
+        0 0 25px #00ffff,
+        0 0 50px rgba(255, 0, 255, 0.6);
+    }
+
+    @keyframes borderMove {
+      0% {
+        background-position: 0%;
+      }
+
+      100% {
+        background-position: 400%;
+      }
+    }
+
+    .search-box {
+      height: 75px;
+      display: flex;
+      align-items: center;
+      background: #101528;
+      border-radius: 50px;
+      padding: 8px;
+    }
+
+    .search-icon {
+      font-size: 27px;
+      margin-left: 18px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.2);
+      }
+    }
+
+    #searchInput {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: white;
+      font-size: 20px;
+      padding: 0 18px;
+    }
+
+    #searchInput::placeholder {
+      color: #8992a9;
+    }
+
+    .search-btn {
+      height: 58px;
+      padding: 0 25px;
+      border: none;
+      border-radius: 40px;
+      cursor: pointer;
+
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+
+      background: linear-gradient(
+        135deg,
+        #00c6ff,
+        #7c3aed,
+        #ff00cc
+      );
+
+      background-size: 200%;
+      transition: 0.3s;
+    }
+
+    .search-btn:hover {
+      transform: scale(1.08);
+      background-position: right;
+      box-shadow: 0 0 20px #ff00cc;
+    }
+
+    /* Suggestions */
+    .suggestions {
+      position: absolute;
+      top: 95px;
+      width: 100%;
+
+      background: rgba(15, 20, 40, 0.96);
+      backdrop-filter: blur(15px);
+
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+
+      overflow: hidden;
+
+      opacity: 0;
+      transform: translateY(-15px);
+      pointer-events: none;
+
+      transition: 0.35s;
+    }
+
+    .suggestions.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .suggestion {
+      color: white;
+      padding: 16px 22px;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    .suggestion:hover {
+      padding-left: 32px;
+
+      background: linear-gradient(
+        90deg,
+        rgba(0,255,255,0.2),
+        rgba(255,0,255,0.2)
+      );
+    }
+
+    /* Result */
+    #result {
+      color: #b9faff;
+      text-align: center;
+      margin-top: 30px;
+      min-height: 25px;
+      font-size: 18px;
+    }
+
+    .searching {
+      animation: blink 0.8s infinite alternate;
+    }
+
+    @keyframes blink {
+      from {
+        opacity: 0.3;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 600px) {
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .search-box {
+        height: 65px;
+      }
+
+      #searchInput {
+        font-size: 16px;
+      }
+
+      .search-btn {
+        height: 50px;
+        padding: 0 17px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <div class="container">
+
+    <h1>
+      <span>SEARCH THE INTERNET</span>
+    </h1>
+
+    <div class="search-wrapper">
+
+      <div class="search-box">
+
+        <div class="search-icon">
+          🔍
+        </div>
+
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="What are you looking for?"
+          autocomplete="off"
+        >
+
+        <button
+          class="search-btn"
+          id="searchBtn"
+        >
+          SEARCH
+        </button>
+
+      </div>
+
+    </div>
+
+    <div
+      class="suggestions"
+      id="suggestions"
+    ></div>
+
+    <div id="result"></div>
+
+  </div>
+
+
+  <script>
+
+    const input =
+      document.getElementById("searchInput");
+
+    const button =
+      document.getElementById("searchBtn");
+
+    const suggestionsBox =
+      document.getElementById("suggestions");
+
+    const result =
+      document.getElementById("result");
+
+
+    const topics = [
+
+      "Learn Python Programming",
+      "JavaScript Animation",
+      "Artificial Intelligence",
+      "Cybersecurity",
+      "HTML and CSS",
+      "C++ Programming",
+      "Machine Learning",
+      "SQL Databases",
+      "Game Development",
+      "Web Development"
+
+    ];
+
+
+    /* Show suggestions */
+
+    input.addEventListener("input", function() {
+
+      const value =
+        input.value.toLowerCase().trim();
+
+      suggestionsBox.innerHTML = "";
+
+
+      if (value === "") {
+
+        suggestionsBox.classList.remove("show");
+
+        return;
+
+      }
+
+
+      const matches = topics.filter(topic =>
+
+        topic.toLowerCase().includes(value)
+
+      );
+
+
+      matches.forEach(topic => {
+
+        const item =
+          document.createElement("div");
+
+        item.className = "suggestion";
+
+        item.textContent = "🔎  " + topic;
+
+
+        item.addEventListener("click", function() {
+
+          input.value = topic;
+
+          suggestionsBox.classList.remove("show");
+
+          runSearch();
+
+        });
+
+
+        suggestionsBox.appendChild(item);
+
+      });
+
+
+      if (matches.length > 0) {
+
+        suggestionsBox.classList.add("show");
+
+      }
+
+      else {
+
+        suggestionsBox.classList.remove("show");
+
+      }
+
+    });
+
+
+    /* Search function */
+
+    function runSearch() {
+
+      const query =
+        input.value.trim();
+
+
+      if (!query) {
+
+        result.textContent =
+          "Please enter something to search.";
+
+        return;
+
+      }
+
+
+      suggestionsBox.classList.remove("show");
+
+      result.classList.add("searching");
+
+      result.textContent =
+        "Searching for \"" + query + "\" ...";
+
+
+      setTimeout(function() {
+
+        result.classList.remove("searching");
+
+        result.innerHTML =
+          "✨ Results ready for <strong>" +
+          query +
+          "</strong>";
+
+      }, 1200);
+
+    }
+
+
+    /* Button search */
+
+    button.addEventListener(
+      "click",
+      runSearch
+    );
+
+
+    /* Press Enter */
+
+    input.addEventListener(
+      "keydown",
+      function(event) {
+
+        if (event.key === "Enter") {
+
+          runSearch();
+
+        }
+
+      }
+    );
+
+
+    /* Hide suggestions */
+
+    document.addEventListener(
+      "click",
+      function(event) {
+
+        if (
+          !event.target.closest(".container")
+        ) {
+
+          suggestionsBox.classList.remove("show");
+
+        }
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>
